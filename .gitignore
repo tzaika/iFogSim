@@ -6,6 +6,7 @@ bin/
 
 # Ignore out files
 out
+output
 
 # Compiled class file
 *.class
