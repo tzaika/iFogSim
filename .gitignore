@@ -3,6 +3,7 @@ bin/
 .classpath
 .settings/
 .project
+out
 
 # Compiled class file
 *.class
