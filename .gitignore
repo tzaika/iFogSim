@@ -3,6 +3,8 @@ bin/
 .classpath
 .settings/
 .project
+
+# Ignore out files
 out
 
 # Compiled class file
