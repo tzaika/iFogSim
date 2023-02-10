@@ -15,8 +15,6 @@ import org.fog.application.AppLoop;
 import org.fog.application.Application;
 import org.fog.application.selectivity.FractionalSelectivity;
 import org.fog.entities.*;
-import org.fog.entities.MicroserviceFogDevice;
-import org.fog.entities.PlacementRequest;
 import org.fog.placement.MicroservicesController;
 import org.fog.placement.PlacementLogicFactory;
 import org.fog.policy.AppModuleAllocationPolicy;
@@ -42,25 +40,20 @@ public class MicroservicesAppSample1 {
     static int proxyServers = 2; // proxy server
     static Integer[] gatewayDevices = new Integer[]{3, 3};        // GW devices
     static Integer[] mobilesPerL2 = new Integer[]{3, 2, 1, 2, 3, 1};   // eg : client end devices ( mobiles )
-    private static int l2Num = 0; // fog adding l1 nodes
     static Integer deviceNum = 0;
-
     // l2 devices can contain multiple resources.
     static boolean diffResource = true;
     static Integer[] cpus = new Integer[]{2800, 6000};
     static Integer[] ram = new Integer[]{2048, 4096};
-
     static double ECG_TRANSMISSION_TIME = 5;
-
     //cluster link latency 2ms
     static Double clusterLatency = 2.0;
-
     //application
     static List<Application> applications = new ArrayList<>();
     static int appCount = 1;
     static List<Pair<Double, Double>> qosValues = new ArrayList<>();
     static int appNum = 0;
-
+    private static int l2Num = 0; // fog adding l1 nodes
 
     /**
      * Config properties
