@@ -23,7 +23,9 @@ import org.fog.utils.FogUtils;
 import org.fog.utils.TimeKeeper;
 import org.fog.utils.distribution.DeterministicDistribution;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -74,39 +76,6 @@ public class TaskOffloadingSimple {
             Log.printLine("Unwanted errors happen");
         }
 
-    }
-
-    private static List<PlacementRequest> generatePlacementRequests() {
-        List<PlacementRequest> placementRequests = new ArrayList<>();
-        for (Sensor s : sensors) {
-            Map<String, Integer> placedMicroservicesMap = new HashMap<>();
-            int sensorGatewayDeviceId = s.getGatewayDeviceId();
-            FogDevice gatewayDevice = findFogDeviceById(sensorGatewayDeviceId);
-            String microserviceName = gatewayDevice != null ? getAppModuleNameByDeviceName(gatewayDevice.getName()) : "ERROR_NO_APP_MODULE_NAME_FOUND";
-            placedMicroservicesMap.put(microserviceName, sensorGatewayDeviceId);
-            PlacementRequest p = new PlacementRequest(s.getAppId(), s.getId(), sensorGatewayDeviceId, placedMicroservicesMap);
-            placementRequests.add(p);
-        }
-        return placementRequests;
-    }
-
-    private static String getAppModuleNameByDeviceName(String deviceName) {
-        if (deviceName.startsWith("local")) {
-            return "local_client";
-        } else if (deviceName.startsWith("mobile")) {
-            return "mobile_client";
-        } else {
-            return "ERROR_NO_APP_MODULE_NAME_FOUND";
-        }
-    }
-
-    private static FogDevice findFogDeviceById(int gatewayDeviceId) {
-        for (FogDevice fogDevice : fogDevices) {
-            if (fogDevice.getId() == gatewayDeviceId) {
-                return fogDevice;
-            }
-        }
-        return null;
     }
 
     private static void createTopology(int userId) {
