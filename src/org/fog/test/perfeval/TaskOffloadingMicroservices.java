@@ -125,13 +125,13 @@ public class TaskOffloadingMicroservices {
         fogDevices.add(localServer);
 
         double throughput = 200;
-        Sensor sensor1 = new Sensor("sensor_1", "SENSOR", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
+        Sensor sensor1 = new Sensor("sensor_1", "SENSOR_1", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
         sensor1.setApp(application);
         sensor1.setGatewayDeviceId(localServer.getId());
         sensor1.setLatency(10.0);
         sensors.add(sensor1);
 
-        Actuator motor1 = new Actuator("motor_1", userId, appId, "MOTOR");
+        Actuator motor1 = new Actuator("motor_1", userId, appId, "MOTOR_1");
         motor1.setApp(application);
         motor1.setGatewayDeviceId(localServer.getId());
         motor1.setLatency(5.0);
@@ -142,13 +142,13 @@ public class TaskOffloadingMicroservices {
         ((MicroserviceFogDevice) mobile).setFonID(mobile.getParentId());
         fogDevices.add(mobile);
 
-        Sensor sensor2 = new Sensor("sensor_2", "SENSOR", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
+        Sensor sensor2 = new Sensor("sensor_2", "SENSOR_2", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
         sensor2.setApp(application);
         sensor2.setGatewayDeviceId(mobile.getId());
         sensor2.setLatency(10.0);
         sensors.add(sensor2);
 
-        Actuator motor2 = new Actuator("motor_2", userId, appId, "MOTOR");
+        Actuator motor2 = new Actuator("motor_2", userId, appId, "MOTOR_2");
         motor2.setApp(application);
         motor2.setGatewayDeviceId(mobile.getId());
         motor2.setLatency(5.0);
@@ -258,28 +258,28 @@ public class TaskOffloadingMicroservices {
         application.addAppModule("mobile_client", 256, 500, 2048, 10000, 1);
 
         // Connecting the application modules (vertices) in the application model (directed graph) with edges
-        application.addAppEdge("SENSOR", "local_client", 100, 2048, "SENSOR", Tuple.UP, AppEdge.SENSOR);
-        application.addAppEdge("SENSOR", "mobile_client", 100, 2048, "SENSOR", Tuple.UP, AppEdge.SENSOR);
-        application.addAppEdge("local_client", "MOTOR", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
-        application.addAppEdge("mobile_client", "MOTOR", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
+        application.addAppEdge("SENSOR_1", "local_client", 100, 2048, "SENSOR_1", Tuple.UP, AppEdge.SENSOR);
+        application.addAppEdge("SENSOR_2", "mobile_client", 100, 2048, "SENSOR_2", Tuple.UP, AppEdge.SENSOR);
+        application.addAppEdge("local_client", "MOTOR_1", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
+        application.addAppEdge("mobile_client", "MOTOR_2", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
         application.addAppEdge("local_client", "big_data", 100, 6000, 131072, "SENSOR_VALUES", Tuple.UP, AppEdge.MODULE);
         application.addAppEdge("mobile_client", "big_data", 100, 3000, 65536, "SENSOR_VALUES", Tuple.UP, AppEdge.MODULE);
         application.addAppEdge("big_data", "local_client", 100, 1000, 4096, "ANALYSIS", Tuple.DOWN, AppEdge.MODULE);
         application.addAppEdge("big_data", "mobile_client", 100, 1000, 4096, "ANALYSIS", Tuple.DOWN, AppEdge.MODULE);
 
         // Defining the input-output relationships (represented by selectivity) of the application modules.
-        application.addTupleMapping("local_client", "SENSOR", "ACTION", new FractionalSelectivity(1.0));
-        application.addTupleMapping("mobile_client", "SENSOR", "ACTION", new FractionalSelectivity(1.0));
+        application.addTupleMapping("local_client", "SENSOR_1", "ACTION", new FractionalSelectivity(1.0));
+        application.addTupleMapping("mobile_client", "SENSOR_2", "ACTION", new FractionalSelectivity(1.0));
         application.addTupleMapping("big_data", "SENSOR_VALUES", "ANALYSIS", new FractionalSelectivity(1.0));
         application.addTupleMapping("local_client", "ANALYSIS", "ACTION", new FractionalSelectivity(1.0));
         application.addTupleMapping("mobile_client", "ANALYSIS", "ACTION", new FractionalSelectivity(1.0));
 
         //Defining application loops to monitor the latency of.
         application.setLoops(asList(
-                createAppLoop("SENSOR", "local_client", "MOTOR"),
-                createAppLoop("SENSOR", "mobile_client", "MOTOR"),
-                createAppLoop("SENSOR", "local_client", "big_data", "local_client", "MOTOR"),
-                createAppLoop("SENSOR", "mobile_client", "big_data", "mobile_client", "MOTOR")));
+                createAppLoop("local_client", "MOTOR_1"),
+                createAppLoop("mobile_client", "MOTOR_2"),
+                createAppLoop("local_client", "big_data", "local_client"),
+                createAppLoop("mobile_client", "big_data")));
 
         application.setSpecialPlacementInfo("big_data", "cloud");
         application.createDAG();
