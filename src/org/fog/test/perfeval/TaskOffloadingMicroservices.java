@@ -12,9 +12,8 @@ import org.fog.application.AppEdge;
 import org.fog.application.Application;
 import org.fog.application.selectivity.FractionalSelectivity;
 import org.fog.entities.*;
-import org.fog.placement.Controller;
-import org.fog.placement.ModuleMapping;
-import org.fog.placement.ModulePlacementMapping;
+import org.fog.placement.MicroservicesController;
+import org.fog.placement.PlacementLogicFactory;
 import org.fog.policy.AppModuleAllocationPolicy;
 import org.fog.scheduler.StreamOperatorScheduler;
 import org.fog.utils.FogDeviceParameter;
@@ -29,12 +28,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.fog.application.AppLoop.createAppLoop;
 
-public class TaskOffloadingSimple {
+public class TaskOffloadingMicroservices {
 
     static List<FogDevice> fogDevices = new ArrayList<>();
     static List<Sensor> sensors = new ArrayList<>();
     static List<Actuator> actuators = new ArrayList<>();
     static List<Application> applications = new ArrayList<>();
+    static Map<Integer, List<FogDevice>> monitored = new HashMap<>();
 
     public static void main(String[] args) {
 
@@ -54,13 +54,12 @@ public class TaskOffloadingSimple {
 
             createTopology(userId);
 
-            ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
-            moduleMapping.addModuleToDevice("big_data", "cloud");
-            moduleMapping.addModuleToDevice("local_client", "localServerNode");
-            moduleMapping.addModuleToDevice("mobile_client", "mobileNode");
+            List<Integer> clusterLevelIdentifier = asList(1);
 
-            Controller controller = new Controller("controller", fogDevices, sensors, actuators);
-            controller.submitApplication(application, new ModulePlacementMapping(fogDevices, application, moduleMapping));
+            int placementAlgo = PlacementLogicFactory.DISTRIBUTED_MICROSERVICES_PLACEMENT;
+            MicroservicesController microservicesController = new MicroservicesController("controller", fogDevices, sensors, applications, clusterLevelIdentifier, 0.0, placementAlgo, monitored);
+
+            microservicesController.submitPlacementRequests(generatePlacementRequests(), 0);
 
             TimeKeeper.getInstance().setSimulationStartTime(Calendar.getInstance().getTimeInMillis());
 
@@ -115,20 +114,24 @@ public class TaskOffloadingSimple {
 
         FogDevice cloud = createCloud();
         cloud.setParentId(-1);
+        monitored.put(cloud.getId(), asList(cloud));
+        ((MicroserviceFogDevice) cloud).setFonID(cloud.getId());
         fogDevices.add(cloud);
 
         FogDevice localServer = createLocalServer();
         localServer.setParentId(cloud.getId());
+        monitored.put(localServer.getId(), asList(localServer));
+        ((MicroserviceFogDevice) localServer).setFonID(localServer.getId());
         fogDevices.add(localServer);
 
         double throughput = 200;
-        Sensor sensor1 = new Sensor("sensor_1", "SENSOR_1", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
+        Sensor sensor1 = new Sensor("sensor_1", "SENSOR", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
         sensor1.setApp(application);
         sensor1.setGatewayDeviceId(localServer.getId());
         sensor1.setLatency(10.0);
         sensors.add(sensor1);
 
-        Actuator motor1 = new Actuator("motor_1", userId, appId, "MOTOR_1");
+        Actuator motor1 = new Actuator("motor_1", userId, appId, "MOTOR");
         motor1.setApp(application);
         motor1.setGatewayDeviceId(localServer.getId());
         motor1.setLatency(5.0);
@@ -136,15 +139,16 @@ public class TaskOffloadingSimple {
 
         FogDevice mobile = createMobile();
         mobile.setParentId(cloud.getId());
+        ((MicroserviceFogDevice) mobile).setFonID(mobile.getParentId());
         fogDevices.add(mobile);
 
-        Sensor sensor2 = new Sensor("sensor_2", "SENSOR_2", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
+        Sensor sensor2 = new Sensor("sensor_2", "SENSOR", userId, appId, new DeterministicDistribution(1000 / (throughput / 9 * 10)));
         sensor2.setApp(application);
         sensor2.setGatewayDeviceId(mobile.getId());
         sensor2.setLatency(10.0);
         sensors.add(sensor2);
 
-        Actuator motor2 = new Actuator("motor_2", userId, appId, "MOTOR_2");
+        Actuator motor2 = new Actuator("motor_2", userId, appId, "MOTOR");
         motor2.setApp(application);
         motor2.setGatewayDeviceId(mobile.getId());
         motor2.setLatency(5.0);
@@ -163,8 +167,10 @@ public class TaskOffloadingSimple {
         cloudParameter.setRatePerMips(0.01);
         cloudParameter.setBusyPower(16 * 103);
         cloudParameter.setIdlePower(16 * 83.25);
+        cloudParameter.setDeviceType(MicroserviceFogDevice.CLOUD);
         cloudParameter.setHostBandwidth(10000000);
         cloudParameter.setHostStorage(16777216); // 16 TB
+        cloudParameter.setClusterLinkBandwidth(1250000);
 
         return createFogDeviceNew(cloudParameter);
     }
@@ -181,8 +187,10 @@ public class TaskOffloadingSimple {
         lsParameter.setRatePerMips(0.0);
         lsParameter.setBusyPower(107.339);
         lsParameter.setIdlePower(83.4333);
+        lsParameter.setDeviceType(MicroserviceFogDevice.FON);
         lsParameter.setHostBandwidth(1000000);
         lsParameter.setHostStorage(1048576); // 1 TB
+        lsParameter.setClusterLinkBandwidth(1250000);
         lsParameter.setUplinkLatency(150); // 150 ms
 
         return createFogDeviceNew(lsParameter);
@@ -200,15 +208,17 @@ public class TaskOffloadingSimple {
         mobileParameter.setRatePerMips(0.0);
         mobileParameter.setBusyPower(87.53);
         mobileParameter.setIdlePower(82.44);
+        mobileParameter.setDeviceType(MicroserviceFogDevice.CLIENT);
         mobileParameter.setHostBandwidth(10000);
         mobileParameter.setHostStorage(65536); // 64 GB
+        mobileParameter.setClusterLinkBandwidth(1250000);
         mobileParameter.setUplinkLatency(200); // 200 ms
 
         return createFogDeviceNew(mobileParameter);
     }
 
 
-    private static FogDevice createFogDeviceNew(FogDeviceParameter p) {
+    private static MicroserviceFogDevice createFogDeviceNew(FogDeviceParameter p) {
 
         List<Pe> peList = new ArrayList<>();
         for (int i = 0; i < p.getNumberOfPes(); i++) {
@@ -231,7 +241,7 @@ public class TaskOffloadingSimple {
                 p.getSystemOS(), p.getSystemVmm(), host, p.getSystemTimezone(), p.getProcessingCost(), p.getMemoryCost(), p.getStorageCost(), p.getBandwidthCost());
 
         try {
-            FogDevice fogDevice = new FogDevice(p.getName(), characteristics, new AppModuleAllocationPolicy(hostList), emptyList(), p.getSchedulingInterval(), p.getUplinkBandwidth(), p.getDownlinkBandwidth(), p.getUplinkLatency(), p.getRatePerMips());
+            MicroserviceFogDevice fogDevice = new MicroserviceFogDevice(p.getName(), characteristics, new AppModuleAllocationPolicy(hostList), emptyList(), p.getSchedulingInterval(), p.getUplinkBandwidth(), p.getDownlinkBandwidth(), p.getClusterLinkBandwidth(), p.getUplinkLatency(), p.getRatePerMips(), p.getDeviceType());
             fogDevice.setLevel(p.getLevel());
             return fogDevice;
         } catch (Exception e) {
@@ -248,28 +258,28 @@ public class TaskOffloadingSimple {
         application.addAppModule("mobile_client", 256, 500, 2048, 10000, 1);
 
         // Connecting the application modules (vertices) in the application model (directed graph) with edges
-        application.addAppEdge("SENSOR_1", "local_client", 100, 2048, "SENSOR_1", Tuple.UP, AppEdge.SENSOR);
-        application.addAppEdge("SENSOR_2", "mobile_client", 100, 2048, "SENSOR_2", Tuple.UP, AppEdge.SENSOR);
+        application.addAppEdge("SENSOR", "local_client", 100, 2048, "SENSOR", Tuple.UP, AppEdge.SENSOR);
+        application.addAppEdge("SENSOR", "mobile_client", 100, 2048, "SENSOR", Tuple.UP, AppEdge.SENSOR);
+        application.addAppEdge("local_client", "MOTOR", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
+        application.addAppEdge("mobile_client", "MOTOR", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
         application.addAppEdge("local_client", "big_data", 100, 6000, 131072, "SENSOR_VALUES", Tuple.UP, AppEdge.MODULE);
         application.addAppEdge("mobile_client", "big_data", 100, 3000, 65536, "SENSOR_VALUES", Tuple.UP, AppEdge.MODULE);
         application.addAppEdge("big_data", "local_client", 100, 1000, 4096, "ANALYSIS", Tuple.DOWN, AppEdge.MODULE);
         application.addAppEdge("big_data", "mobile_client", 100, 1000, 4096, "ANALYSIS", Tuple.DOWN, AppEdge.MODULE);
-        application.addAppEdge("local_client", "MOTOR_1", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
-        application.addAppEdge("mobile_client", "MOTOR_2", 1000, 1024, "ACTION", Tuple.DOWN, AppEdge.ACTUATOR);
 
         // Defining the input-output relationships (represented by selectivity) of the application modules.
-        application.addTupleMapping("local_client", "SENSOR_1", "ACTION", new FractionalSelectivity(1.0));
-        application.addTupleMapping("mobile_client", "SENSOR_2", "ACTION", new FractionalSelectivity(1.0));
+        application.addTupleMapping("local_client", "SENSOR", "ACTION", new FractionalSelectivity(1.0));
+        application.addTupleMapping("mobile_client", "SENSOR", "ACTION", new FractionalSelectivity(1.0));
         application.addTupleMapping("big_data", "SENSOR_VALUES", "ANALYSIS", new FractionalSelectivity(1.0));
         application.addTupleMapping("local_client", "ANALYSIS", "ACTION", new FractionalSelectivity(1.0));
         application.addTupleMapping("mobile_client", "ANALYSIS", "ACTION", new FractionalSelectivity(1.0));
 
         //Defining application loops to monitor the latency of.
         application.setLoops(asList(
-                createAppLoop("local_client", "MOTOR_1"),
-                createAppLoop("mobile_client", "MOTOR_2"),
-                createAppLoop("local_client", "big_data", "local_client"),
-                createAppLoop("mobile_client", "big_data")));
+                createAppLoop("SENSOR", "local_client", "MOTOR"),
+                createAppLoop("SENSOR", "mobile_client", "MOTOR"),
+                createAppLoop("SENSOR", "local_client", "big_data", "local_client", "MOTOR"),
+                createAppLoop("SENSOR", "mobile_client", "big_data", "mobile_client", "MOTOR")));
 
         application.setSpecialPlacementInfo("big_data", "cloud");
         application.createDAG();
