@@ -237,8 +237,9 @@ public class TaskOffloadingSimple {
         application.setLoops(asList(
                 createAppLoop("local_client", "MOTOR_1"),
                 createAppLoop("mobile_client", "MOTOR_2"),
-                createAppLoop("local_client", "big_data", "local_client"),
-                createAppLoop("mobile_client", "big_data")));
+                createAppLoop("big_data", "local_client"),
+                createAppLoop("mobile_client", "big_data"),
+                createAppLoop("local_client", "big_data", "mobile_client")));
 
         application.setSpecialPlacementInfo("big_data", "cloud");
         application.createDAG();
