@@ -6,38 +6,39 @@ import java.util.List;
 import java.util.Map;
 
 public class ModuleMapping {
-    /**
-     * Mapping from node name to list of <moduleName, numInstances> of instances to be launched on node
-     */
-    protected Map<String, List<String>> moduleMapping;
+
+    private Map<String, List<String>> deviceToModules;
 
     protected ModuleMapping() {
-        setModuleMapping(new HashMap<String, List<String>>());
+        setDeviceToModules(new HashMap<>());
     }
 
     public static ModuleMapping createModuleMapping() {
         return new ModuleMapping();
     }
 
-    public Map<String, List<String>> getModuleMapping() {
-        return moduleMapping;
+    public Map<String, List<String>> getDeviceToModules() {
+        return deviceToModules;
     }
 
-    public void setModuleMapping(Map<String, List<String>> moduleMapping) {
-        this.moduleMapping = moduleMapping;
+    public void setDeviceToModules(Map<String, List<String>> deviceToModules) {
+        this.deviceToModules = deviceToModules;
     }
 
-    /**
-     * Add <b>instanceCount</b> number of instances of module <b>moduleName</b> to <b>device deviceName</b>
-     *
-     * @param moduleName
-     * @param deviceName
-     */
+    public void addModuleToDeviceIfNotPresent(String moduleName, String deviceName) {
+        if (!getDeviceToModules().containsKey(deviceName)) {
+            deviceToModules.put(deviceName, new ArrayList<>());
+        }
+        if (!deviceToModules.get(deviceName).contains(moduleName)) {
+            deviceToModules.get(deviceName).add(moduleName);
+        }
+    }
+
     public void addModuleToDevice(String moduleName, String deviceName) {
-        if (!getModuleMapping().containsKey(deviceName))
-            getModuleMapping().put(deviceName, new ArrayList<String>());
-        if (!getModuleMapping().get(deviceName).contains(moduleName))
-            getModuleMapping().get(deviceName).add(moduleName);
+        if (!getDeviceToModules().containsKey(deviceName)) {
+            deviceToModules.put(deviceName, new ArrayList<>());
+        }
+        deviceToModules.get(deviceName).add(moduleName);
     }
 
 }

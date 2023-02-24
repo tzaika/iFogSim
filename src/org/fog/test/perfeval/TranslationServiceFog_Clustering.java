@@ -20,7 +20,6 @@ import org.fog.mobilitydata.References;
 import org.fog.placement.ClusteringController;
 import org.fog.placement.LocationHandler;
 import org.fog.placement.ModuleMapping;
-import org.fog.placement.ModulePlacementMobileEdgewards;
 import org.fog.placement.ModulePlacementMobileEdgewardsCluster;
 import org.fog.policy.AppModuleAllocationPolicy;
 import org.fog.scheduler.StreamOperatorScheduler;
@@ -94,7 +93,7 @@ public class TranslationServiceFog_Clustering {
 
             ModuleMapping moduleMapping = ModuleMapping.createModuleMapping(); // initializing a module mapping
 
-            moduleMapping.addModuleToDevice("storageModule", "cloud");
+            moduleMapping.addModuleToDeviceIfNotPresent("storageModule", "cloud");
 
             ClusteringController controller;
             if (Config.ENABLE_DYNAMIC_CLUSTERING) {
@@ -105,8 +104,8 @@ public class TranslationServiceFog_Clustering {
                 controller = new ClusteringController("master-controller", fogDevices, sensors,
                         actuators, locator, clusteringLevels);
             }
-            Boolean clusteringFeature = true; 
-            controller.submitApplication(application, 0, (new ModulePlacementMobileEdgewardsCluster(fogDevices, sensors, actuators, application, moduleMapping,clusteringFeature)));
+            Boolean clusteringFeature = true;
+            controller.submitApplication(application, 0, (new ModulePlacementMobileEdgewardsCluster(fogDevices, sensors, actuators, application, moduleMapping, clusteringFeature)));
 
             TimeKeeper.getInstance().setSimulationStartTime(Calendar.getInstance().getTimeInMillis());
 

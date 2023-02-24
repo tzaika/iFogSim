@@ -91,7 +91,7 @@ public class TranslationServiceFog_RandomMobility {
 
             ModuleMapping moduleMapping = ModuleMapping.createModuleMapping(); // initializing a module mapping
 
-            moduleMapping.addModuleToDevice("storageModule", "cloud");
+            moduleMapping.addModuleToDeviceIfNotPresent("storageModule", "cloud");
 
             MobilityController controller = new MobilityController("master-controller", fogDevices, sensors,
                     actuators, locator);

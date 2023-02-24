@@ -17,7 +17,10 @@ import org.fog.entities.*;
 import org.fog.mobilitydata.DataParser;
 import org.fog.mobilitydata.RandomMobilityGenerator;
 import org.fog.mobilitydata.References;
-import org.fog.placement.*;
+import org.fog.placement.ClusteringController;
+import org.fog.placement.LocationHandler;
+import org.fog.placement.ModuleMapping;
+import org.fog.placement.ModulePlacementMobileEdgewardsCluster;
 import org.fog.policy.AppModuleAllocationPolicy;
 import org.fog.scheduler.StreamOperatorScheduler;
 import org.fog.utils.Config;
@@ -90,7 +93,7 @@ public class TranslationServiceFog_RandomMobility_Clustering {
 
             ModuleMapping moduleMapping = ModuleMapping.createModuleMapping(); // initializing a module mapping
 
-            moduleMapping.addModuleToDevice("storageModule", "cloud");
+            moduleMapping.addModuleToDeviceIfNotPresent("storageModule", "cloud");
 
             ClusteringController controller;
             if (Config.ENABLE_DYNAMIC_CLUSTERING) {

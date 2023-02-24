@@ -17,10 +17,12 @@ import org.fog.entities.*;
 import org.fog.mobilitydata.DataParser;
 import org.fog.mobilitydata.RandomMobilityGenerator;
 import org.fog.mobilitydata.References;
-import org.fog.placement.*;
+import org.fog.placement.LocationHandler;
+import org.fog.placement.MobilityController;
+import org.fog.placement.ModuleMapping;
+import org.fog.placement.ModulePlacementMobileEdgewards;
 import org.fog.policy.AppModuleAllocationPolicy;
 import org.fog.scheduler.StreamOperatorScheduler;
-import org.fog.utils.Config;
 import org.fog.utils.FogLinearPowerModel;
 import org.fog.utils.FogUtils;
 import org.fog.utils.TimeKeeper;
@@ -85,7 +87,7 @@ public class CardiovascularHealthMonitoringApplicationEdgeward {
 
             ModuleMapping moduleMapping = ModuleMapping.createModuleMapping(); // initializing a module mapping
 
-            moduleMapping.addModuleToDevice("mService3", "cloud");
+            moduleMapping.addModuleToDeviceIfNotPresent("mService3", "cloud");
 
             MobilityController controller = new MobilityController("master-controller", fogDevices, sensors,
                     actuators, locator);
