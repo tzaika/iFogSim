@@ -36,7 +36,7 @@ public class TaskOffloadingComplex {
     public static void main(String[] args) {
 
         try {
-            Log.enable();
+            Log.disable();
 
             CloudSim.init(1, Calendar.getInstance(), true);
 
@@ -51,7 +51,9 @@ public class TaskOffloadingComplex {
 
             createTopology(userId);
 
-            ModuleMapping moduleMapping = generateModuleMapping(CLOUDS, createTaskLoad(FULL_LOAD));
+            // ModuleMapping moduleMapping = generateModuleMapping(CLOUD_ONLY, createTaskLoad(FULL_LOAD));
+            ModuleMapping moduleMapping = createExampleMapping();
+            // ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
 
             Controller controller = new Controller("controller", fogDevices, sensors, actuators);
             controller.submitApplication(application, new ModulePlacementMapping(fogDevices, application, moduleMapping));
@@ -130,9 +132,29 @@ public class TaskOffloadingComplex {
         localCloudParam.setIdlePower(4 * 83.25);
         localCloudParam.setHostBandwidth(2000000);
         localCloudParam.setHostStorage(4194304); // 4 TB
-        localCloudParam.setUplinkLatency(25); // 25 ms
+        localCloudParam.setUplinkLatency(150); // 150 ms
 
         return createFogDeviceNew(localCloudParam);
+    }
+
+    private static ModuleMapping createExampleMapping() {
+        ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
+
+        moduleMapping.addModuleToDevice(BIG_DATA, CLOUD);
+        moduleMapping.addModuleToDevice(BIG_DATA, "localCloud_1");
+        moduleMapping.addModuleToDevice(BIG_DATA, "localCloud_2");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_1");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_2");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_3");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_4");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_1");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_2");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_3");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_4");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_5");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_6");
+
+        return moduleMapping;
     }
 
     private static List<String> createTaskLoad(String loadType) {

@@ -161,7 +161,7 @@ public class TaskOffloadingSimple {
         lsParameter.setIdlePower(83.4333);
         lsParameter.setHostBandwidth(1000000);
         lsParameter.setHostStorage(1048576); // 1 TB
-        lsParameter.setUplinkLatency(150); // 150 ms
+        lsParameter.setUplinkLatency(80); // 80 ms
 
         return createFogDeviceNew(lsParameter);
     }
@@ -180,7 +180,7 @@ public class TaskOffloadingSimple {
         mobileParameter.setIdlePower(82.44);
         mobileParameter.setHostBandwidth(10000);
         mobileParameter.setHostStorage(65536); // 64 GB
-        mobileParameter.setUplinkLatency(200); // 200 ms
+        mobileParameter.setUplinkLatency(100); // 100 ms
 
         return createFogDeviceNew(mobileParameter);
     }
@@ -221,8 +221,8 @@ public class TaskOffloadingSimple {
 
         // Adding modules (vertices) to the application model (directed graph)
         application.addAppModule(BIG_DATA, 2048, 2000, 16384, 100000, 4); // ram in MB, MIPS, storageSize in MB, bw in kbps
-        application.addAppModule(LOCAL_CLIENT, 512, 1000, 8192, 100000, 2);
-        application.addAppModule(MOBILE_CLIENT, 256, 500, 2048, 10000, 1);
+        application.addAppModule(LOCAL_CLIENT, 512, 1000, 8192, 10000, 2);
+        application.addAppModule(MOBILE_CLIENT, 256, 500, 2048, 1000, 1);
 
         // Connecting the application modules (vertices) in the application model (directed graph) with edges
         application.addAppEdge(SENSOR_1, LOCAL_CLIENT, 100, 2048, SENSOR_1, Tuple.UP, AppEdge.SENSOR);
