@@ -19,6 +19,14 @@ import static org.fog.test.perfeval.TaskOffloadingSimple.*;
 
 public class TaskOffloadingComplex {
 
+    public static final String LOW_LOAD = "low";
+    public static final String MEDIUM_LOAD = "medium";
+    public static final String FULL_LOAD = "full";
+    public static final String CLOUD_ONLY = "cloudOnly";
+    public static final String LOCAL_CLOUD = "localCloud";
+    public static final String CLOUDS = "clouds";
+    public static final String LOCAL_SERVERS = "localServers";
+    public static final String MOBILE_DEVICES = "mobileDevices";
     private static final Map<String, Integer> deviceNameToId = new HashMap<>();
     static List<FogDevice> fogDevices = new ArrayList<>();
     static List<Sensor> sensors = new ArrayList<>();
@@ -43,20 +51,7 @@ public class TaskOffloadingComplex {
 
             createTopology(userId);
 
-            ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
-            moduleMapping.addModuleToDevice(BIG_DATA, CLOUD);
-            moduleMapping.addModuleToDevice(BIG_DATA, "localCloud_1");
-            moduleMapping.addModuleToDevice(BIG_DATA, "localCloud_2");
-            moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_1");
-            moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_2");
-            moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_3");
-            moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_4");
-            moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_1");
-            moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_2");
-            moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_3");
-            moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_4");
-            moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_5");
-            moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_6");
+            ModuleMapping moduleMapping = generateModuleMapping(CLOUDS, createTaskLoad(FULL_LOAD));
 
             Controller controller = new Controller("controller", fogDevices, sensors, actuators);
             controller.submitApplication(application, new ModulePlacementMapping(fogDevices, application, moduleMapping));
@@ -138,6 +133,58 @@ public class TaskOffloadingComplex {
         localCloudParam.setUplinkLatency(25); // 25 ms
 
         return createFogDeviceNew(localCloudParam);
+    }
+
+    private static List<String> createTaskLoad(String loadType) {
+        switch (loadType) {
+            case LOW_LOAD:
+                return Arrays.asList(BIG_DATA, LOCAL_CLIENT, MOBILE_CLIENT);
+
+            case MEDIUM_LOAD:
+                return Arrays.asList(BIG_DATA, BIG_DATA, LOCAL_CLIENT, LOCAL_CLIENT,
+                        MOBILE_CLIENT, MOBILE_CLIENT, MOBILE_CLIENT);
+
+            case FULL_LOAD:
+                return Arrays.asList(BIG_DATA, BIG_DATA, BIG_DATA, LOCAL_CLIENT, LOCAL_CLIENT, LOCAL_CLIENT, LOCAL_CLIENT,
+                        MOBILE_CLIENT, MOBILE_CLIENT, MOBILE_CLIENT, MOBILE_CLIENT, MOBILE_CLIENT, MOBILE_CLIENT);
+
+            default:
+                return Collections.emptyList();
+
+            // TODO: Add overbooked (wiht mobile clients)
+        }
+    }
+
+    private static ModuleMapping generateModuleMapping(String locationStrategy, List<String> modules) {
+        ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
+        switch (locationStrategy) {
+            case CLOUD_ONLY:
+                for (String module : modules) {
+                    moduleMapping.addModuleToDevice(module, CLOUD);
+                }
+                break;
+            case LOCAL_CLOUD:
+                for (int i = 0; i < modules.size(); i++) {
+                    int cloudIndex = (i % 2) + 1;
+                    moduleMapping.addModuleToDevice(modules.get(i), "localCloud_" + cloudIndex);
+                }
+                break;
+            case CLOUDS:
+                for (int i = 0; i < modules.size(); i++) {
+                    int cloudIndex = i % 3;
+                    moduleMapping.addModuleToDevice(modules.get(i), cloudIndex == 0 ? CLOUD : "localCloud_" + cloudIndex);
+                }
+                break;
+            case LOCAL_SERVERS:
+                // TODO: Create local server mapping
+                break;
+            case MOBILE_DEVICES:
+                // TODO: Create mobile device mapping
+                break;
+            default:
+                break;
+        }
+        return moduleMapping;
     }
 
 }
