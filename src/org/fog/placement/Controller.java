@@ -118,6 +118,14 @@ public class Controller extends SimEntity {
 
     private void printCostDetails() {
         System.out.println("\nCost of execution in cloud = " + getCloud().getTotalCost());
+        double totalCost = 0.0;
+        for (FogDevice fogDevice : getFogDevices()) {
+            double cost = fogDevice.getTotalCost();
+            totalCost += cost;
+            System.out.println(fogDevice.getName() + " : Cost = " + cost);
+        }
+        System.out.println("\nTotal cost = " + totalCost);
+
     }
 
     private void printPowerDetails() {

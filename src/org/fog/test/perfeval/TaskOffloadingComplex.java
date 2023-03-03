@@ -54,6 +54,7 @@ public class TaskOffloadingComplex {
             // ModuleMapping moduleMapping = generateModuleMapping(CLOUD_ONLY, createTaskLoad(FULL_LOAD));
             ModuleMapping moduleMapping = createExampleMapping();
             // ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
+            // moduleMapping.addModuleToDevice(LOCAL_CLIENT, "mobileDevice_1");
 
             Controller controller = new Controller("controller", fogDevices, sensors, actuators);
             controller.submitApplication(application, new ModulePlacementMapping(fogDevices, application, moduleMapping));
@@ -127,7 +128,7 @@ public class TaskOffloadingComplex {
         localCloudParam.setUplinkBandwidth(2000000); // 2 Gbps
         localCloudParam.setDownlinkBandwidth(2000000);
         localCloudParam.setLevel(1);
-        localCloudParam.setRatePerMips(0.01);
+        localCloudParam.setRatePerMips(0.0004);
         localCloudParam.setBusyPower(4 * 103.0);
         localCloudParam.setIdlePower(4 * 83.25);
         localCloudParam.setHostBandwidth(2000000);

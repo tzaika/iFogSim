@@ -138,7 +138,7 @@ public class TaskOffloadingSimple {
         cloudParameter.setUplinkBandwidth(10000000); // 10 Gbps
         cloudParameter.setDownlinkBandwidth(10000000);
         cloudParameter.setLevel(0);
-        cloudParameter.setRatePerMips(0.01);
+        cloudParameter.setRatePerMips(0.0005);
         cloudParameter.setBusyPower(16 * 103.0);
         cloudParameter.setIdlePower(16 * 83.25);
         cloudParameter.setHostBandwidth(10000000);
@@ -156,7 +156,7 @@ public class TaskOffloadingSimple {
         lsParameter.setUplinkBandwidth(1000000); // 1 Gbps
         lsParameter.setDownlinkBandwidth(1000000);
         lsParameter.setLevel(level);
-        lsParameter.setRatePerMips(0.0);
+        lsParameter.setRatePerMips(0.00025);
         lsParameter.setBusyPower(107.339);
         lsParameter.setIdlePower(83.4333);
         lsParameter.setHostBandwidth(1000000);
@@ -175,7 +175,7 @@ public class TaskOffloadingSimple {
         mobileParameter.setUplinkBandwidth(10000); // 10 Mbps
         mobileParameter.setDownlinkBandwidth(5000); // 5 Mbps
         mobileParameter.setLevel(level);
-        mobileParameter.setRatePerMips(0.0);
+        mobileParameter.setRatePerMips(0.0001);
         mobileParameter.setBusyPower(87.53);
         mobileParameter.setIdlePower(82.44);
         mobileParameter.setHostBandwidth(10000);
