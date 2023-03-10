@@ -51,12 +51,15 @@ public class TaskOffloadingComplex {
 
             createTopology(userId);
 
+            // TODO: change all Provisors to Simple, becaouse it makes no sense this way
+            // TODO: check if bw influences the performance
             // ModuleMapping moduleMapping = generateModuleMapping(CLOUD_ONLY, createTaskLoad(FULL_LOAD));
             ModuleMapping moduleMapping = createExampleMapping();
             // ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
             // moduleMapping.addModuleToDevice(LOCAL_CLIENT, "mobileDevice_1");
 
-            Controller controller = new Controller("controller", fogDevices, sensors, actuators);
+            // Controller controller = new Controller("cloud_only_full_load", fogDevices, sensors, actuators);
+            Controller controller = new Controller("balanced_full_load", fogDevices, sensors, actuators);
             controller.submitApplication(application, new ModulePlacementMapping(fogDevices, application, moduleMapping));
 
             TimeKeeper.getInstance().setSimulationStartTime(Calendar.getInstance().getTimeInMillis());
@@ -129,8 +132,8 @@ public class TaskOffloadingComplex {
         localCloudParam.setDownlinkBandwidth(2000000);
         localCloudParam.setLevel(1);
         localCloudParam.setRatePerMips(0.0004);
-        localCloudParam.setBusyPower(4 * 103.0);
-        localCloudParam.setIdlePower(4 * 83.25);
+        localCloudParam.setMaxBusyPower(4 * 103.0);
+        localCloudParam.setIdlePowerPercent(0.09);
         localCloudParam.setHostBandwidth(2000000);
         localCloudParam.setHostStorage(4194304); // 4 TB
         localCloudParam.setUplinkLatency(150); // 150 ms

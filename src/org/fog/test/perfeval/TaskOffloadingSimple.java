@@ -3,11 +3,13 @@ package org.fog.test.perfeval;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
+import org.cloudbus.cloudsim.VmSchedulerTimeShared;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.power.PowerHost;
+import org.cloudbus.cloudsim.power.models.PowerModelLinear;
+import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
-import org.cloudbus.cloudsim.sdn.overbooking.BwProvisionerOverbooking;
 import org.fog.application.AppEdge;
 import org.fog.application.Application;
 import org.fog.application.selectivity.FractionalSelectivity;
@@ -16,9 +18,7 @@ import org.fog.placement.Controller;
 import org.fog.placement.ModuleMapping;
 import org.fog.placement.ModulePlacementMapping;
 import org.fog.policy.AppModuleAllocationPolicy;
-import org.fog.scheduler.StreamOperatorScheduler;
 import org.fog.utils.FogDeviceParameter;
-import org.fog.utils.FogLinearPowerModel;
 import org.fog.utils.FogUtils;
 import org.fog.utils.TimeKeeper;
 import org.fog.utils.distribution.DeterministicDistribution;
@@ -139,8 +139,8 @@ public class TaskOffloadingSimple {
         cloudParameter.setDownlinkBandwidth(10000000);
         cloudParameter.setLevel(0);
         cloudParameter.setRatePerMips(0.0005);
-        cloudParameter.setBusyPower(16 * 103.0);
-        cloudParameter.setIdlePower(16 * 83.25);
+        cloudParameter.setMaxBusyPower(16 * 103.0);
+        cloudParameter.setIdlePowerPercent(0.1);
         cloudParameter.setHostBandwidth(10000000);
         cloudParameter.setHostStorage(16777216); // 16 TB
 
@@ -157,8 +157,8 @@ public class TaskOffloadingSimple {
         lsParameter.setDownlinkBandwidth(1000000);
         lsParameter.setLevel(level);
         lsParameter.setRatePerMips(0.00025);
-        lsParameter.setBusyPower(107.339);
-        lsParameter.setIdlePower(83.4333);
+        lsParameter.setMaxBusyPower(107.339);
+        lsParameter.setIdlePowerPercent(0.07);
         lsParameter.setHostBandwidth(1000000);
         lsParameter.setHostStorage(1048576); // 1 TB
         lsParameter.setUplinkLatency(80); // 80 ms
@@ -176,8 +176,8 @@ public class TaskOffloadingSimple {
         mobileParameter.setDownlinkBandwidth(5000); // 5 Mbps
         mobileParameter.setLevel(level);
         mobileParameter.setRatePerMips(0.0001);
-        mobileParameter.setBusyPower(87.53);
-        mobileParameter.setIdlePower(82.44);
+        mobileParameter.setMaxBusyPower(87.53);
+        mobileParameter.setIdlePowerPercent(0.04);
         mobileParameter.setHostBandwidth(10000);
         mobileParameter.setHostStorage(65536); // 64 GB
         mobileParameter.setUplinkLatency(100); // 100 ms
@@ -195,11 +195,11 @@ public class TaskOffloadingSimple {
         PowerHost host = new PowerHost(
                 FogUtils.generateEntityId(),
                 new RamProvisionerSimple(p.getRam()),
-                new BwProvisionerOverbooking(p.getHostBandwidth()),
+                new BwProvisionerSimple(p.getHostBandwidth()),
                 p.getHostStorage(),
                 peList,
-                new StreamOperatorScheduler(peList),
-                new FogLinearPowerModel(p.getBusyPower(), p.getIdlePower())
+                new VmSchedulerTimeShared(peList),
+                new PowerModelLinear(p.getMaxBusyPower(), 0.1)
         );
 
         List<Host> hostList = asList(host);

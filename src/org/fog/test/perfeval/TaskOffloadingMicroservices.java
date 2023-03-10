@@ -5,6 +5,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.power.PowerHost;
+import org.cloudbus.cloudsim.power.models.PowerModelLinear;
 import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.sdn.overbooking.BwProvisionerOverbooking;
@@ -15,7 +16,6 @@ import org.fog.placement.PlacementLogicFactory;
 import org.fog.policy.AppModuleAllocationPolicy;
 import org.fog.scheduler.StreamOperatorScheduler;
 import org.fog.utils.FogDeviceParameter;
-import org.fog.utils.FogLinearPowerModel;
 import org.fog.utils.FogUtils;
 import org.fog.utils.TimeKeeper;
 import org.fog.utils.distribution.DeterministicDistribution;
@@ -162,8 +162,8 @@ public class TaskOffloadingMicroservices {
         cloudParameter.setDownlinkBandwidth(10000000);
         cloudParameter.setLevel(0);
         cloudParameter.setRatePerMips(0.01);
-        cloudParameter.setBusyPower(16 * 103.0);
-        cloudParameter.setIdlePower(16 * 83.25);
+        cloudParameter.setMaxBusyPower(16 * 103.0);
+        cloudParameter.setIdlePowerPercent(0.1);
         cloudParameter.setDeviceType(MicroserviceFogDevice.CLOUD);
         cloudParameter.setHostBandwidth(10000000);
         cloudParameter.setHostStorage(16777216); // 16 TB
@@ -182,8 +182,8 @@ public class TaskOffloadingMicroservices {
         lsParameter.setDownlinkBandwidth(1000000);
         lsParameter.setLevel(1);
         lsParameter.setRatePerMips(0.0);
-        lsParameter.setBusyPower(107.339);
-        lsParameter.setIdlePower(83.4333);
+        lsParameter.setMaxBusyPower(107.339);
+        lsParameter.setIdlePowerPercent(0.07);
         lsParameter.setDeviceType(MicroserviceFogDevice.FON);
         lsParameter.setHostBandwidth(1000000);
         lsParameter.setHostStorage(1048576); // 1 TB
@@ -203,8 +203,8 @@ public class TaskOffloadingMicroservices {
         mobileParameter.setDownlinkBandwidth(5000); // 5 Mbps
         mobileParameter.setLevel(1);
         mobileParameter.setRatePerMips(0.0);
-        mobileParameter.setBusyPower(87.53);
-        mobileParameter.setIdlePower(82.44);
+        mobileParameter.setMaxBusyPower(87.53);
+        mobileParameter.setIdlePowerPercent(0.04);
         mobileParameter.setDeviceType(MicroserviceFogDevice.CLIENT);
         mobileParameter.setHostBandwidth(10000);
         mobileParameter.setHostStorage(65536); // 64 GB
@@ -229,7 +229,7 @@ public class TaskOffloadingMicroservices {
                 p.getHostStorage(),
                 peList,
                 new StreamOperatorScheduler(peList),
-                new FogLinearPowerModel(p.getBusyPower(), p.getIdlePower())
+                new PowerModelLinear(p.getMaxBusyPower(), p.getIdlePowerPercent())
         );
 
         List<Host> hostList = asList(host);

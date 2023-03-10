@@ -12,8 +12,8 @@ public class FogDeviceParameter {
     private long downlinkBandwidth;
     private int level;
     private double ratePerMips;
-    private double busyPower;
-    private double idlePower;
+    private double maxBusyPower;
+    private double idlePowerPercent;
     private String deviceType;
     private long hostStorage;
     private int hostBandwidth;
@@ -42,8 +42,8 @@ public class FogDeviceParameter {
         fogDeviceParameter.setDownlinkBandwidth(10000);
         fogDeviceParameter.setLevel(0);
         fogDeviceParameter.setRatePerMips(0.05);
-        fogDeviceParameter.setBusyPower(100);
-        fogDeviceParameter.setIdlePower(3.2);
+        fogDeviceParameter.setMaxBusyPower(100);
+        fogDeviceParameter.setIdlePowerPercent(0.05);
         fogDeviceParameter.setDeviceType(MicroserviceFogDevice.CLOUD);
         fogDeviceParameter.setHostStorage(262144);
         fogDeviceParameter.setHostBandwidth(10000);
@@ -126,20 +126,20 @@ public class FogDeviceParameter {
         this.ratePerMips = ratePerMips;
     }
 
-    public double getBusyPower() {
-        return busyPower;
+    public double getMaxBusyPower() {
+        return maxBusyPower;
     }
 
-    public void setBusyPower(double busyPower) {
-        this.busyPower = busyPower;
+    public void setMaxBusyPower(double maxBusyPower) {
+        this.maxBusyPower = maxBusyPower;
     }
 
-    public double getIdlePower() {
-        return idlePower;
+    public double getIdlePowerPercent() {
+        return idlePowerPercent;
     }
 
-    public void setIdlePower(double idlePower) {
-        this.idlePower = idlePower;
+    public void setIdlePowerPercent(double idlePowerPercent) {
+        this.idlePowerPercent = idlePowerPercent;
     }
 
     public String getDeviceType() {

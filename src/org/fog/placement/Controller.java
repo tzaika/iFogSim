@@ -12,22 +12,21 @@ import org.fog.entities.FogDevice;
 import org.fog.entities.Sensor;
 import org.fog.utils.*;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.*;
 
 public class Controller extends SimEntity {
 
     public static boolean ONLY_CLOUD = false;
+    private final NumberFormat numberFormat = NumberFormat.getInstance(Locale.GERMAN);
 
     private List<FogDevice> fogDevices;
     private List<Sensor> sensors;
     private List<Actuator> actuators;
-
     private Map<String, Application> applications;
     private Map<String, Integer> appLaunchDelays;
-
     private Map<String, ModulePlacement> appModulePlacementPolicy;
 
     public Controller(String name, List<FogDevice> fogDevices, List<Sensor> sensors, List<Actuator> actuators) {
@@ -95,10 +94,13 @@ public class Controller extends SimEntity {
                 break;
             case FogEvents.STOP_SIMULATION:
                 CloudSim.stopSimulation();
-                printTimeDetails();
-                printPowerDetails();
-                printNetworkUsageDetails();
-                printCostDetails();
+                writeResultsHeaderToFile();
+                writeResultValuesToCsvFile();
+                writeTotalsToCsvFile();
+                // printTimeDetails();
+                // printPowerDetails();
+                // printNetworkUsageDetails();
+                // printCostDetails();
                 System.exit(0);
                 break;
 
@@ -179,6 +181,74 @@ public class Controller extends SimEntity {
         }
 
         System.out.println("=========================================");
+    }
+
+    private void writeResultsHeaderToFile() {
+        try (FileWriter fw = new FileWriter("./results/" + this.getName() + "_header.txt")) {
+            fw.write("============== " + this.getName() + " =============" + System.lineSeparator());
+            fw.write("=========================================" + System.lineSeparator());
+            fw.write("================ RESULTS ================" + System.lineSeparator());
+            fw.write("=========================================" + System.lineSeparator());
+            fw.write("EXECUTION TIME : " + (Calendar.getInstance().getTimeInMillis() - TimeKeeper.getInstance().getSimulationStartTime()) + System.lineSeparator());
+            fw.write("=========================================" + System.lineSeparator());
+            fw.write("APPLICATION LOOP DELAYS" + System.lineSeparator());
+            fw.write("=========================================" + System.lineSeparator());
+            for (Integer loopId : TimeKeeper.getInstance().getLoopIdToTupleIds().keySet()) {
+                fw.write(getStringForLoopId(loopId) + " ---> " + TimeKeeper.getInstance().getLoopIdToCurrentAverage().get(loopId) + System.lineSeparator());
+            }
+            fw.write("=========================================" + System.lineSeparator());
+            fw.write("TUPLE CPU EXECUTION DELAY" + System.lineSeparator());
+            fw.write("=========================================" + System.lineSeparator());
+
+            for (String tupleType : TimeKeeper.getInstance().getTupleTypeToAverageCpuTime().keySet()) {
+                fw.write(tupleType + " ---> " + TimeKeeper.getInstance().getTupleTypeToAverageCpuTime().get(tupleType) + System.lineSeparator());
+            }
+
+            fw.write("=========================================" + System.lineSeparator());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeResultValuesToCsvFile() {
+        try (FileWriter fw = new FileWriter("./results/" + this.getName() + "_values.csv")) {
+            fw.write("fog_device ; energy ; cost" + System.lineSeparator());
+            for (FogDevice fogDevice : getFogDevices()) {
+                fw.write(fogDevice.getName() + " ; " + numberFormat.format(fogDevice.getEnergyConsumption())
+                        + " ; " + numberFormat.format(fogDevice.getTotalCost()) + System.lineSeparator());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeTotalsToCsvFile() {
+        try (FileWriter fw = new FileWriter("./results/" + this.getName() + "_totals.csv")) {
+            fw.write("total ; value" + System.lineSeparator());
+            fw.write("energy ; " + numberFormat.format(calculateTotalEnergyConsumption()) + System.lineSeparator());
+            fw.write("cost ; " + numberFormat.format(calculateTotalCost()) + System.lineSeparator());
+            fw.write("network ; " + numberFormat.format(NetworkUsageMonitor.getNetworkUsage() / Config.MAX_SIMULATION_TIME) + System.lineSeparator());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private double calculateTotalEnergyConsumption() {
+        double totalEnergyConsumption = 0.0;
+        for (FogDevice fogDevice : getFogDevices()) {
+            double energyConsumption = fogDevice.getEnergyConsumption();
+            totalEnergyConsumption += energyConsumption;
+        }
+        return totalEnergyConsumption;
+    }
+
+    private double calculateTotalCost() {
+        double totalCost = 0.0;
+        for (FogDevice fogDevice : getFogDevices()) {
+            double cost = fogDevice.getTotalCost();
+            totalCost += cost;
+        }
+        return totalCost;
     }
 
     protected void manageResources() {
