@@ -132,7 +132,7 @@ public class TaskOffloadingSimple {
     protected static FogDevice createCloud() {
         FogDeviceParameter cloudParameter = FogDeviceParameter.getDefaultFogDevice();
         cloudParameter.setName(CLOUD);
-        cloudParameter.setMipsPerPe(50000); // 10 x normal PC
+        cloudParameter.setMipsPerPe(100000); // 50 x normal PC (10 Pe * 100 000 = 1 million MIPS)
         cloudParameter.setNumberOfPes(10);
         cloudParameter.setRam(1048576); // 1 TB
         cloudParameter.setUplinkBandwidth(10000000); // 10 Gbps
@@ -150,7 +150,7 @@ public class TaskOffloadingSimple {
     protected static FogDevice createLocalServer(String name, int level) {
         FogDeviceParameter lsParameter = FogDeviceParameter.getDefaultFogDevice();
         lsParameter.setName(name);
-        lsParameter.setMipsPerPe(5000); // normal PC
+        lsParameter.setMipsPerPe(5000); // normal PC (4 Pe * 5000 = 20 000 MIPS)
         lsParameter.setNumberOfPes(4);
         lsParameter.setRam(131072); // 128 GB
         lsParameter.setUplinkBandwidth(1000000); // 1 Gbps
@@ -243,11 +243,12 @@ public class TaskOffloadingSimple {
 
         //Defining application loops to monitor the latency of.
         application.setLoops(asList(
-                createAppLoop(LOCAL_CLIENT, MOTOR_1),
-                createAppLoop(MOBILE_CLIENT, MOTOR_2),
-                createAppLoop(BIG_DATA, LOCAL_CLIENT),
+                createAppLoop(SENSOR_1, LOCAL_CLIENT),
+                createAppLoop(SENSOR_2, MOBILE_CLIENT),
+                createAppLoop(LOCAL_CLIENT, BIG_DATA),
                 createAppLoop(MOBILE_CLIENT, BIG_DATA),
-                createAppLoop(LOCAL_CLIENT, BIG_DATA, MOBILE_CLIENT)));
+                createAppLoop(BIG_DATA, LOCAL_CLIENT),
+                createAppLoop(BIG_DATA, MOBILE_CLIENT)));
 
         application.setSpecialPlacementInfo(BIG_DATA, CLOUD);
         application.createDAG();
