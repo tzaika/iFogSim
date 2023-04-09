@@ -56,8 +56,6 @@ public class TaskOffloadingSimple {
     public static void main(String[] args) {
 
         try {
-            Log.enable();
-
             CloudSim.init(1, Calendar.getInstance(), true);
 
             FogBroker broker = new FogBroker("broker");
@@ -140,7 +138,7 @@ public class TaskOffloadingSimple {
         cloudParameter.setLevel(0);
         cloudParameter.setRatePerMips(0.0005);
         cloudParameter.setMaxBusyPower(16 * 103.0);
-        cloudParameter.setIdlePowerPercent(0.1);
+        cloudParameter.setIdlePowerPercent(0.2);
         cloudParameter.setHostBandwidth(10000000);
         cloudParameter.setHostStorage(16777216); // 16 TB
 
@@ -199,7 +197,7 @@ public class TaskOffloadingSimple {
                 p.getHostStorage(),
                 peList,
                 new VmSchedulerTimeShared(peList),
-                new PowerModelLinear(p.getMaxBusyPower(), 0.1)
+                new PowerModelLinear(p.getMaxBusyPower(), p.getIdlePowerPercent())
         );
 
         List<Host> hostList = asList(host);

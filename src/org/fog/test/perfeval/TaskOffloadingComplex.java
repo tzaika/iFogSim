@@ -51,8 +51,6 @@ public class TaskOffloadingComplex {
 
             createTopology(userId);
 
-            // TODO: change all Provisors to Simple, becaouse it makes no sense this way
-            // TODO: check if bw influences the performance
             // ModuleMapping moduleMapping = generateModuleMapping(CLOUD_ONLY, createTaskLoad(FULL_LOAD));
             ModuleMapping moduleMapping = createExampleMapping();
             // ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
@@ -133,7 +131,7 @@ public class TaskOffloadingComplex {
         localCloudParam.setLevel(1);
         localCloudParam.setRatePerMips(0.0004);
         localCloudParam.setMaxBusyPower(4 * 103.0);
-        localCloudParam.setIdlePowerPercent(0.09);
+        localCloudParam.setIdlePowerPercent(0.15);
         localCloudParam.setHostBandwidth(2000000);
         localCloudParam.setHostStorage(4194304); // 4 TB
         localCloudParam.setUplinkLatency(150); // 150 ms
