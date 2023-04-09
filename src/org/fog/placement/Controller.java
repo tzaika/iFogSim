@@ -228,6 +228,11 @@ public class Controller extends SimEntity {
             fw.write("energy ; " + numberFormat.format(calculateTotalEnergyConsumption()) + System.lineSeparator());
             fw.write("cost ; " + numberFormat.format(calculateTotalCost()) + System.lineSeparator());
             fw.write("network ; " + numberFormat.format(NetworkUsageMonitor.getNetworkUsage() / Config.MAX_SIMULATION_TIME) + System.lineSeparator());
+            fw.write(" ; " + System.lineSeparator());
+            fw.write("loop ; value" + System.lineSeparator());
+            for (Integer loopId : TimeKeeper.getInstance().getLoopIdToTupleIds().keySet()) {
+                fw.write(getStringForLoopId(loopId) + " ; " + numberFormat.format(TimeKeeper.getInstance().getLoopIdToCurrentAverage().get(loopId)) + System.lineSeparator());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
