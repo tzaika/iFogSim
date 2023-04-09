@@ -125,7 +125,7 @@ public class TaskOffloadingComplex {
     private static FogDevice createLocalCloud(String name) {
         FogDeviceParameter localCloudParam = FogDeviceParameter.getDefaultFogDevice();
         localCloudParam.setName(name);
-        localCloudParam.setMipsPerPe(10000); // 2 x normal PC
+        localCloudParam.setMipsPerPe(50000); // 20 x normal PC (8 Pe * 50 000 = 400 000 MIPS)
         localCloudParam.setNumberOfPes(8);
         localCloudParam.setRam(262144); // 256 GB
         localCloudParam.setUplinkBandwidth(2000000); // 2 Gbps
