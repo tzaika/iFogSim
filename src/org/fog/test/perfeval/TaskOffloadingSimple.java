@@ -34,13 +34,13 @@ import static org.fog.application.AppLoop.createAppLoop;
 public class TaskOffloadingSimple {
 
     public static final String APP_ID_PDM_DEMO = "PDM-Demonstrator";
-    public static final String BIG_DATA = "big_data";
-    public static final String LOCAL_CLIENT = "local_client";
-    public static final String MOBILE_CLIENT = "mobile_client";
-    public static final String SENSOR_1 = "SENSOR_1";
-    public static final String SENSOR_2 = "SENSOR_2";
-    public static final String MOTOR_1 = "MOTOR_1";
-    public static final String MOTOR_2 = "MOTOR_2";
+    public static final String BIG_DATA = "big-data";
+    public static final String LOCAL_CLIENT = "local-client";
+    public static final String MOBILE_CLIENT = "mobile-client";
+    public static final String SENSOR_1 = "SENSOR-1";
+    public static final String SENSOR_2 = "SENSOR-2";
+    public static final String MOTOR_1 = "MOTOR-1";
+    public static final String MOTOR_2 = "MOTOR-2";
     public static final String SENSOR_VALUES = "SENSOR_VALUES";
     public static final String ANALYSIS = "ANALYSIS";
     public static final String ACTION = "ACTION";
@@ -56,6 +56,8 @@ public class TaskOffloadingSimple {
     public static void main(String[] args) {
 
         try {
+            Log.disable();
+
             CloudSim.init(1, Calendar.getInstance(), true);
 
             FogBroker broker = new FogBroker("broker");
@@ -70,10 +72,10 @@ public class TaskOffloadingSimple {
 
             ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
             moduleMapping.addModuleToDevice(BIG_DATA, CLOUD);
-            moduleMapping.addModuleToDevice(LOCAL_CLIENT, LOCAL_SERVER);
-            moduleMapping.addModuleToDevice(MOBILE_CLIENT, MOBILE);
+            moduleMapping.addModuleToDevice(LOCAL_CLIENT, CLOUD);
+            moduleMapping.addModuleToDevice(MOBILE_CLIENT, CLOUD);
 
-            Controller controller = new Controller("controller", fogDevices, sensors, actuators);
+            Controller controller = new Controller("simple_full_cloud_only", fogDevices, sensors, actuators);
             controller.submitApplication(application, new ModulePlacementMapping(fogDevices, application, moduleMapping));
 
             TimeKeeper.getInstance().setSimulationStartTime(Calendar.getInstance().getTimeInMillis());
@@ -112,7 +114,7 @@ public class TaskOffloadingSimple {
     }
 
     protected static Sensor attachSensor(FogDevice fogDevice, int userId, String appId, Application application, String sensorType) {
-        Sensor sensor = new Sensor(fogDevice.getName() + "_sensor", sensorType, userId, appId, new DeterministicDistribution(1000 / (SENSOR_THROUGHPUT / 9 * 10)));
+        Sensor sensor = new Sensor(fogDevice.getName() + "-sensor", sensorType, userId, appId, new DeterministicDistribution(1000 / (SENSOR_THROUGHPUT / 9 * 10)));
         sensor.setApp(application);
         sensor.setGatewayDeviceId(fogDevice.getId());
         sensor.setLatency(10.0);
@@ -120,7 +122,7 @@ public class TaskOffloadingSimple {
     }
 
     protected static Actuator attachActuator(FogDevice fogDevice, int userId, String appId, Application application, String actuatorType) {
-        Actuator motor = new Actuator(fogDevice.getName() + "_motor", userId, appId, actuatorType);
+        Actuator motor = new Actuator(fogDevice.getName() + "-motor", userId, appId, actuatorType);
         motor.setApp(application);
         motor.setGatewayDeviceId(fogDevice.getId());
         motor.setLatency(5.0);

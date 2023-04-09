@@ -51,13 +51,13 @@ public class TaskOffloadingComplex {
 
             createTopology(userId);
 
-            // ModuleMapping moduleMapping = generateModuleMapping(CLOUD_ONLY, createTaskLoad(FULL_LOAD));
+            //ModuleMapping moduleMapping = generateModuleMapping(CLOUD_ONLY, createTaskLoad(FULL_LOAD));
             ModuleMapping moduleMapping = createExampleMapping();
             // ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
             // moduleMapping.addModuleToDevice(LOCAL_CLIENT, "mobileDevice_1");
 
             // Controller controller = new Controller("cloud_only_full_load", fogDevices, sensors, actuators);
-            Controller controller = new Controller("balanced_full_load", fogDevices, sensors, actuators);
+            Controller controller = new Controller("complex_full_fair", fogDevices, sensors, actuators);
             controller.submitApplication(application, new ModulePlacementMapping(fogDevices, application, moduleMapping));
 
             TimeKeeper.getInstance().setSimulationStartTime(Calendar.getInstance().getTimeInMillis());
@@ -84,18 +84,18 @@ public class TaskOffloadingComplex {
         deviceNameToId.put(cloud.getName(), cloud.getId());
 
         for (int i = 1; i <= 2; i++) {
-            FogDevice localCloud = createLocalCloud("localCloud_" + i);
+            FogDevice localCloud = createLocalCloud("localCloud-" + i);
             localCloud.setParentId(cloud.getId());
             fogDevices.add(localCloud);
             deviceNameToId.put(localCloud.getName(), localCloud.getId());
         }
 
         for (int i = 1; i <= 4; i++) {
-            FogDevice localServer = createLocalServer("localServer_" + i, 2);
+            FogDevice localServer = createLocalServer("localServer-" + i, 2);
             if (i <= 2) {
-                localServer.setParentId(deviceNameToId.get("localCloud_1"));
+                localServer.setParentId(deviceNameToId.get("localCloud-1"));
             } else {
-                localServer.setParentId(deviceNameToId.get("localCloud_2"));
+                localServer.setParentId(deviceNameToId.get("localCloud-2"));
                 sensors.add(attachSensor(localServer, userId, appId, application, SENSOR_1));
                 actuators.add(attachActuator(localServer, userId, appId, application, MOTOR_1));
             }
@@ -104,14 +104,14 @@ public class TaskOffloadingComplex {
         }
 
         for (int i = 1; i <= 6; i++) {
-            FogDevice mobile = createMobile("mobileDevice_" + i, 3);
+            FogDevice mobile = createMobile("mobileDevice-" + i, 3);
             if (i <= 2) {
-                mobile.setParentId(deviceNameToId.get("localServer_1"));
+                mobile.setParentId(deviceNameToId.get("localServer-1"));
             } else if (i <= 4) {
-                mobile.setParentId(deviceNameToId.get("localServer_2"));
+                mobile.setParentId(deviceNameToId.get("localServer-2"));
             } else {
                 mobile.setLevel(2);
-                mobile.setParentId(deviceNameToId.get("localCloud_2"));
+                mobile.setParentId(deviceNameToId.get("localCloud-2"));
             }
             sensors.add(attachSensor(mobile, userId, appId, application, SENSOR_2));
             actuators.add(attachActuator(mobile, userId, appId, application, MOTOR_2));
@@ -143,18 +143,18 @@ public class TaskOffloadingComplex {
         ModuleMapping moduleMapping = ModuleMapping.createModuleMapping();
 
         moduleMapping.addModuleToDevice(BIG_DATA, CLOUD);
-        moduleMapping.addModuleToDevice(BIG_DATA, "localCloud_1");
-        moduleMapping.addModuleToDevice(BIG_DATA, "localCloud_2");
-        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_1");
-        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_2");
-        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_3");
-        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer_4");
-        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_1");
-        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_2");
-        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_3");
-        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_4");
-        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_5");
-        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice_6");
+        moduleMapping.addModuleToDevice(BIG_DATA, "localCloud-1");
+        moduleMapping.addModuleToDevice(BIG_DATA, "localCloud-2");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer-1");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer-2");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer-3");
+        moduleMapping.addModuleToDevice(LOCAL_CLIENT, "localServer-4");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice-1");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice-2");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice-3");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice-4");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice-5");
+        moduleMapping.addModuleToDevice(MOBILE_CLIENT, "mobileDevice-6");
 
         return moduleMapping;
     }
@@ -190,13 +190,13 @@ public class TaskOffloadingComplex {
             case LOCAL_CLOUD:
                 for (int i = 0; i < modules.size(); i++) {
                     int cloudIndex = (i % 2) + 1;
-                    moduleMapping.addModuleToDevice(modules.get(i), "localCloud_" + cloudIndex);
+                    moduleMapping.addModuleToDevice(modules.get(i), "localCloud-" + cloudIndex);
                 }
                 break;
             case CLOUDS:
                 for (int i = 0; i < modules.size(); i++) {
                     int cloudIndex = i % 3;
-                    moduleMapping.addModuleToDevice(modules.get(i), cloudIndex == 0 ? CLOUD : "localCloud_" + cloudIndex);
+                    moduleMapping.addModuleToDevice(modules.get(i), cloudIndex == 0 ? CLOUD : "localCloud-" + cloudIndex);
                 }
                 break;
             case LOCAL_SERVERS:

@@ -212,7 +212,7 @@ public class Controller extends SimEntity {
 
     private void writeResultValuesToCsvFile() {
         try (FileWriter fw = new FileWriter("./results/" + this.getName() + "_values.csv")) {
-            fw.write("fog_device ; energy ; cost" + System.lineSeparator());
+            fw.write("fogDevice ; energy ; cost" + System.lineSeparator());
             for (FogDevice fogDevice : getFogDevices()) {
                 fw.write(fogDevice.getName() + " ; " + numberFormat.format(fogDevice.getEnergyConsumption())
                         + " ; " + numberFormat.format(fogDevice.getTotalCost()) + System.lineSeparator());
@@ -229,7 +229,7 @@ public class Controller extends SimEntity {
             fw.write("cost ; " + numberFormat.format(calculateTotalCost()) + System.lineSeparator());
             fw.write("network ; " + numberFormat.format(NetworkUsageMonitor.getNetworkUsage() / Config.MAX_SIMULATION_TIME) + System.lineSeparator());
             fw.write(" ; " + System.lineSeparator());
-            fw.write("loop ; value" + System.lineSeparator());
+            fw.write("loop ; delay" + System.lineSeparator());
             for (Integer loopId : TimeKeeper.getInstance().getLoopIdToTupleIds().keySet()) {
                 fw.write(getStringForLoopId(loopId) + " ; " + numberFormat.format(TimeKeeper.getInstance().getLoopIdToCurrentAverage().get(loopId)) + System.lineSeparator());
             }
